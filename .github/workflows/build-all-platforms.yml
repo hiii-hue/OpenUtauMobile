@@ -23,8 +23,7 @@ jobs:
             run: dotnet restore OpenUtauMobile/OpenUtauMobile.csproj -p:TargetFrameworks=net9.0-ios -p:CheckEolWorkLoads=false
             
           - name: Build iOS App
-            run: dotnet publish OpenUtauMobile/OpenUtauMobile.csproj -f net9.0-ios -c Release -r ios-arm64 -p:TargetFrameworks=net9.0-ios -p:CheckEolWorkLoads=false -p:ArchiveOnBuild=true -p:EnableCodeSigning=false
-
+            run: dotnet publish OpenUtauMobile/OpenUtauMobile.csproj -f net9.0-ios -c Release -r ios-arm64 -p:CheckEolWorkLoads=false -p:ArchiveOnBuild=true -p:EnableCodeSigning=false
           - name: Package IPA if needed
             run: |
              mkdir -p output
