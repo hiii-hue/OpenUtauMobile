@@ -17,7 +17,7 @@ jobs:
               dotnet-version: '9.0.x' 
 
           - name: Pin .NET 9 SDK
-            run: dotnet new globaljson --sdk-version 9.0.100 --roll forward latestFeature --force
+            run: dotnet new globaljson --sdk-version 9.0.100 --roll-forward latestFeature --force
 
           - name: Install MAUI iOS workload
             run: dotnet workload install maui
