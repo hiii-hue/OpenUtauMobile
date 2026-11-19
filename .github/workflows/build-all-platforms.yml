@@ -11,7 +11,7 @@ jobs:
           - name: Checkout code
             uses: actions/checkout@v4
 
-           -name: Setup .NET 9
+          - name: Setup .NET 9
             uses: actions/setup-dotnet@v4
             with:
               dotnet-version: '9.0.x' 
@@ -21,12 +21,14 @@ jobs:
             
           - name: Restore dependencies
             run: |
-              SLN=$(find . -name ''*.sln'' | head -n 1) 
-              echo ''Found solution:$SLN''
-              dotnet restore ''$SLN'' -p:TargetFramework=net9.0-ios
+              SLN=$(find . -name "*.sln" | head -n 1) 
+              echo "Found solution:$SLN"
+              dotnet restore ""$SLN" -p:TargetFramework=net9.0-ios
           - name: Publish unsigned IPA
             run: |
-               CSPROJ=$(find . -name ''OpenUtaumobile echo ''Found projects: $CSPROJ'' dotnet publish ''$CSPROJ'' -f net9.0-ios -c Debug -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:TargetFrameworks=net9.0-ios -p:EnableCodeSigning=false
+               CSPROJ=$(find . -name "OpenUtauMobile.csproj" | head -n 1
+               echo "found project : $CSproj"
+               dotnet publish "$CSPROJ" -f net9.0-ios -c Debug -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:TargetFrameworks+net9.0-ios -pEnableCodeSigning=false
           - name: Upload IPA artifact
             uses: actions/upload-artifact@v4
             with:  
