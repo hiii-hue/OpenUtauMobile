@@ -17,8 +17,10 @@ jobs:
             run: dotnet workload install maui-ios 
             
           - name: Restore dependencies
-            run: dotnet restore OpenUtauMobile/OpenUtaumobile.sln -p:TargetFramework=net9.0-ios
-
+            run: |
+              SLN=$(find . -name ''*.sln'' | head -n 1) 
+              echo ''Found solution:$SLN''
+              dotnet restore ''$SLN'' -p:TargetFramework=net9.0-ios
           - name: Publish unsigned IPA
             run: |
                CSPROJ=$(find . -name ''OpenUtaumobile echo ''Found projects: $CSPROJ'' dotnet publish ''$CSPROJ'' -f net9.0-ios -c Debug -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:TargetFrameworks=net9.0-ios -p:EnableCodeSigning=false
