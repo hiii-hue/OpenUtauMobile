@@ -1,29 +1,29 @@
-name: Build OpenUtauMobile iOS IPA
+name: Build OpenUtauMobile iOS IPA 
 
-on:
-  push:
+on: 
+  push: 
 
-jobs:
-  build-ios:
-    runs-on: macos-latest
+jobs: 
+  build-ios: 
+    runs-on: macos-latest 
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    steps: 
+      - name: Checkout repository 
+        uses: actions/checkout@v4 
 
-      - name: Setup .NET 9
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '9.0.x'
+      - name: Setup .NET 9 
+        uses: actions/setup-dotnet@v4 
+        with: 
+          dotnet-version: '9.0.x' 
 
-      - name: Install MAUI iOS workload
-        run: dotnet workload install maui-ios
+      - name: Install MAUI iOS workload 
+        run: dotnet workload install maui-ios 
 
-      - name: Restore dependencies
-        run: dotnet restore -p:TargetFramework=net9.0-ios
+      - name: Restore dependencies 
+        run: dotnet restore -p:TargetFramework=net9.0-ios 
 
-      - name: Build unsigned IPA
-        run: |
+      - name: Build unsigned IPA 
+        run: | 
           dotnet publish OpenUtauMobile/OpenUtauMobile.csproj \
             -f net9.0-ios \
             -c Release \
@@ -50,4 +50,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OpenUtauMobile-iOS
-          path: output/OpenUtauMobile.ipa
+          path: output/OpenUtauMobile.ipa 
+          
