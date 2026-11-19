@@ -20,15 +20,11 @@ jobs:
             run: dotnet workload install maui-ios 
             
           - name: Restore dependencies
-            run: |
-              SLN=$(find . -name "*.sln" | head -n 1) 
-              echo "Found solution:$SLN"
-              dotnet restore ""$SLN" -p:TargetFramework=net9.0-ios
+            run: dotnet publish OpenUtauMobile.sln -p:TargetFramework=net9.0-ios
+            
           - name: Publish unsigned IPA
-            run: |
-               CSPROJ=$(find . -name "OpenUtauMobile.csproj" | head -n 1
-               echo "found project : $CSproj"
-               dotnet publish "$CSPROJ" -f net9.0-ios -c Debug -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:TargetFrameworks+net9.0-ios -pEnableCodeSigning=false
+            run: dotnet publish OpenUtauMobile/OpenUtauMobile/OpenUtauMobile.csproj -f net9.0-ios -c Debug -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:TargetFrameworks=net9.0-ios -p:EnableCodeSigning=false
+            
           - name: Upload IPA artifact
             uses: actions/upload-artifact@v4
             with:  
