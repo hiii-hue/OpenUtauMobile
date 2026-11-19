@@ -16,8 +16,8 @@ jobs:
             with:
               dotnet-version: '9.0.x' 
 
-           - name: Pin .NET 9 SDK
-             run: dotnet new globaljson --sdk-version 9.0.100 --roll forward latestFeature --force
+          - name: Pin .NET 9 SDK
+            run: dotnet new globaljson --sdk-version 9.0.100 --roll forward latestFeature --force
 
           - name: Install MAUI iOS workload
             run: dotnet workload install maui
@@ -27,10 +27,10 @@ jobs:
           - name: Package IPA if needed
             run: |
              mkdir -p output
-               App_DIR$(find OpenUtauMobile/bin -name "*.app" | head -n 1)
+               App_DIR$=(find OpenUtauMobile/bin -name "*.app" | head -n 1)
                mkdir -p Payload
                cp -R "$APP_DIR" Payload/
-               zip -r output?poenUtauMobile.ipa Payload
+               zip -r output/OpenUtauMobile.ipa Payload
 
           - name: Upload IPA artifact
             uses: actions/upload-artifact@v4
