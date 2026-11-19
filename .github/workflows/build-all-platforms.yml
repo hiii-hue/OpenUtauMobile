@@ -17,7 +17,7 @@ jobs:
             run: dotnet workload install maui-ios 
             
           - name: Restore dependencies
-            run: dotnet restore OpenUtauMobile/OpenUtauMobile.csproj -p:TargetFrameworks=net9.0-ios
+            run: dotnet restore OpenUtauMobile/OpenUtauMobile.csproj -p:TargetFramework=net9.0-ios
 
           - name: Publish unsigned IPA
             run: dotnet publish OpenUtauMobile/OpenUtauMobile.csproj -f net9.0-ios -c RElease -r ios-arm64/p:ArchiveOnBuild=true /p:EnableCodeSigning=false
