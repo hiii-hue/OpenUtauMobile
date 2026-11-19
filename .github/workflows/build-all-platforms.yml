@@ -17,16 +17,29 @@ jobs:
               dotnet-version: '9.0.x' 
 
           - name: Install MAUI iOS workload
-            run: dotnet workload install maui-ios 
+            run: dotnet workload install maui 
             
           - name: Restore dependencies
-            run: dotnet publish OpenUtauMobile.sln -p:TargetFramework=net9.0-ios
+            run: dotnet publish OpenUtauMobile/OpenUtauMobile.csproj -p:TargetFrameworks=net9.0-ios
             
-          - name: Publish unsigned IPA
-            run: dotnet publish OpenUtauMobile/OpenUtauMobile/OpenUtauMobile.csproj -f net9.0-ios -c Debug -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:TargetFrameworks=net9.0-ios -p:EnableCodeSigning=false
-            
+          - name: Build iOS App
+            run: dotnet publish OpenUtauMobile/OpenUtauMobile.csproj -f net9.0-ios -c Release -r ios-arm64 -p:TargetFrameworks=net9.0-ios -p:ArchiveOnBuild=true -p:EnableCodeSigning=false
+
+          - name: Package IPA if needed
+            run: |
+             mkdir -p output
+             IPA_FILE=$(find OpenUtauMobile/bin -name "*.app" | head -n 1)
+             if [ -n "$IPA_FILE" ] ; then
+               cp "$IPA_FILE" output/OpenUtauMobile.ipa\
+             else
+               App_DIR$(find OpenUtauMobile/bin -name "*.app" | head -n 1)
+               mkdir -p Payload
+               cp -R "$APP_DIR" Payload/
+               zip -r output?poenUtauMobile.ipa Payload
+               fi
+
           - name: Upload IPA artifact
             uses: actions/upload-artifact@v4
             with:  
               name: OpenUtauMobile-iOS
-              path: '**/bin/**/net9.0-ios/ios-arm64/publish/*.ipa'
+              path: output/OpenUtauMobile.ipa
