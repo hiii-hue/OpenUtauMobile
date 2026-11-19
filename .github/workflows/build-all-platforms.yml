@@ -1,19 +1,12 @@
 name: Build iOS IPA
 
-
-
 on:
   push:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-
-
-    jobs:
+jobs:
       build:
-        runs-on:macos-15
+        runs-on: macos-15
         steps:
           - name: Setup .NET 9
             uses: actions/setup-dotnet@v4
@@ -30,8 +23,8 @@ permissions:
             run: dotnet publish OpenUtauMobile.csproj -f net9.0-ios -c RElease -r ios-arm64/p:ArchiveOnBuild=true /p:EnableCodeSigning=false
 
           - name: Upload IPA artifact
-            uses: actions/setup-dotnet@v4
-        with:
-          name: OpenUtauMobile-iOS
-          path: '**/bin/Release/net9.0-ios/ios-arm64/publish/*.ipa'
-          
+            uses: actions/upload-artifact@v4
+            with:  
+              name: OpenUtauMobile-iOS
+              path: '**/bin/Release/net9.0-ios/ios-arm64/publish/*.ipa'
+             
