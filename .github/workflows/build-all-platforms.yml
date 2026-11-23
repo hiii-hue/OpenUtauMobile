@@ -1,6 +1,10 @@
-name: Build Unsigned iOS IPA
+name: Build iOS
 
 on:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+    branches: [ main, master, dev ]
   workflow_dispatch:
 
 jobs:
@@ -13,47 +17,22 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup .NET 9
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: 9.0.x
 
-      - name: Install .NET iOS & MAUI workloads
-        run: |
-          dotnet workload update
-          dotnet workload install ios maui-ios
+      - name: Install .NET MAUI workload
+        run: dotnet workload install maui-ios
 
-      - name: Locate iOS Project and Build
-        run: |
-          IOS_CSPROJ=$(find . -maxdepth 4 -name "*.csproj" -exec grep -l "net9.0-ios" {} + | head -n 1)
-          if [ -z "$IOS_CSPROJ" ]; then
-            echo "No net9.0-ios project found, searching for any iOS csproj..."
-            IOS_CSPROJ=$(find . -maxdepth 4 -name "*.csproj" -exec grep -l "\-ios" {} + | head -n 1)
-          fi
-          echo "Found iOS project: $IOS_CSPROJ"
-          dotnet publish "$IOS_CSPROJ" \
-            -c Release \
-            -f net9.0-ios \
-            -r ios-arm64 \
-            -p:ArchiveOnBuild=false \
-            -p:EnableCodeSigning=false \
-            -p:CodesignRequireProvisioningProfile=false \
-            -o ./ios-output
+      - name: Restore dependencies
+        run: dotnet restore OpenUtauMobile/OpenUtauMobile.csproj -p:TargetFrameworks=net9.0-ios
 
-      - name: Package .app into Unsigned .ipa
-        run: |
-          mkdir -p Payload
-          APP_BUNDLE=$(find ./ios-output -name "*.app" -type d | head -n 1)
-          if [ -z "$APP_BUNDLE" ]; then
-            echo "Error: Could not find compiled .app bundle!"
-            ls -la ./ios-output
-            exit 1
-          fi
-          cp -R "$APP_BUNDLE" Payload/
-          zip -r OpenUtauMobile-unsigned.ipa Payload
+      - name: Build iOS app
+        run: dotnet build OpenUtauMobile/OpenUtauMobile.csproj -c Release -f net9.0-ios --no-restore
 
-      - name: Upload Unsigned IPA Artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OpenUtauMobile-IPA
-          path: OpenUtauMobile-unsigned.ipa
+          name: OpenUtauMobile-iOS
+          path: OpenUtauMobile/bin/Release/net9.0-ios/
