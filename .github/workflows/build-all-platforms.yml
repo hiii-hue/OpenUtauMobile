@@ -17,14 +17,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Select Xcode 26.3
-        run: |
-          XCODE_26=$(ls -d /Applications/Xcode_26.3*.app /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -n 1)
-          if [ -n "$XCODE_26" ]; then
-            sudo xcode-select -s "$XCODE_26/Contents/Developer"
-          fi
-          xcodebuild -version
-
       - name: Pin .NET 9 SDK
         run: dotnet new globaljson --sdk-version 9.0.300 --roll-forward latestFeature --force
 
@@ -33,8 +25,19 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
-      - name: Install .NET MAUI workload (matched to Xcode 26.3)
-        run: dotnet workload install maui-ios --version 9.0.311
+      - name: Select Xcode and install matching workload
+        run: |
+          if [ -d "/Applications/Xcode_26.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
+            dotnet workload install maui-ios --version 9.0.308
+          elif [ -d "/Applications/Xcode_26.0.1.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_26.0.1.app/Contents/Developer
+            dotnet workload install maui-ios --version 9.0.308
+          else
+            sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+            dotnet workload install maui-ios --version 9.0.305
+          fi
+          xcodebuild -version
 
       - name: Restore dependencies
         run: dotnet restore OpenUtauMobile/OpenUtauMobile.csproj -p:TargetFrameworks=net9.0-ios -p:CheckEolWorkloads=false
@@ -47,4 +50,3 @@ jobs:
         with:
           name: OpenUtauMobile-iOS
           path: OpenUtauMobile/bin/Release/net9.0-ios/
-          
