@@ -1,39 +1,60 @@
-name: Build iOS IPA
+
+name: Build Unsigned iOS IPA
 
 on:
-  push:
   workflow_dispatch:
 
 jobs:
-      build:
-        runs-on: macos-26
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v4
+  build-ios:
+    runs-on: macos-latest
 
-          - name: Setup .NET 9
-            uses: actions/setup-dotnet@v4
-            with:
-              dotnet-version: '9.0.x' 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-          - name: Pin .NET 9 SDK
-            run: dotnet new globaljson --sdk-version 9.0.100 --roll-forward latestFeature --force
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
 
-          - name: Install MAUI iOS workload
-            run: dotnet workload install maui
-            
-          - name: Build iOS App
-            run: dotnet publish OpenUtauMobile/OpenUtauMobile.csproj -f net9.0-ios -c Release -r ios-arm64 -p:TargetFrameworks=net9.0-ios -p:VerifyXcodeVersion=false -p:ArchiveOnBuild=false -p:EnableCodeSigning=false -p:_RquireCodeSigning=false
-          - name: Package IPA if needed
-            run: |
-             mkdir -p output
-               App_DIR$=(find OpenUtauMobile/bin -name "*.app" | head -n 1)
-               mkdir -p Payload
-               cp -R "$APP_DIR" Payload/
-               zip -r output/OpenUtauMobile.ipa Payload
+      - name: Install .NET iOS & MAUI workloads
+        run: |
+          dotnet workload update
+          dotnet workload install ios maui-ios
 
-          - name: Upload IPA artifact
-            uses: actions/upload-artifact@v4
-            with:  
-              name: OpenUtauMobile-iOS
-              path: output/OpenUtauMobile.ipa
+      - name: Locate iOS Project and Build
+        run: |
+          IOS_CSPROJ=$(find . -maxdepth 4 -name "*.csproj" -exec grep -l "net9.0-ios" {} + | head -n 1)
+          if [ -z "$IOS_CSPROJ" ]; then
+            echo "No net9.0-ios project found, searching for any iOS csproj..."
+            IOS_CSPROJ=$(find . -maxdepth 4 -name "*.csproj" -exec grep -l "\-ios" {} + | head -n 1)
+          fi
+          echo "Found iOS project: $IOS_CSPROJ"
+          dotnet publish "$IOS_CSPROJ" \
+            -c Release \
+            -f net9.0-ios \
+            -r ios-arm64 \
+            -p:ArchiveOnBuild=false \
+            -p:EnableCodeSigning=false \
+            -p:CodesignRequireProvisioningProfile=false \
+            -o ./ios-output
+
+      - name: Package .app into Unsigned .ipa
+        run: |
+          mkdir -p Payload
+          APP_BUNDLE=$(find ./ios-output -name "*.app" -type d | head -n 1)
+          if [ -z "$APP_BUNDLE" ]; then
+            echo "Error: Could not find compiled .app bundle!"
+            ls -la ./ios-output
+            exit 1
+          fi
+          cp -R "$APP_BUNDLE" Payload/
+          zip -r OpenUtauMobile-unsigned.ipa Payload
+
+      - name: Upload Unsigned IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenUtauMobile-IPA
+          path: OpenUtauMobile-unsigned.ipa
