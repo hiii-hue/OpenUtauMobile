@@ -9,13 +9,23 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Select Xcode 26
+        run: |
+          XCODE_26=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -n 1)
+          if [ -n "$XCODE_26" ]; then
+            sudo xcode-select -s "$XCODE_26/Contents/Developer"
+          else
+            ls -d /Applications/Xcode*.app
+          fi
+          xcodebuild -version
 
       - name: Pin .NET 9 SDK
         run: dotnet new globaljson --sdk-version 9.0.300 --roll-forward latestFeature --force
