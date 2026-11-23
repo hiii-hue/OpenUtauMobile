@@ -17,6 +17,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Pin .NET 9 SDK
+        run: dotnet new globaljson --sdk-version 9.0.300 --roll-forward latestFeature --force
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -29,7 +32,7 @@ jobs:
         run: dotnet restore OpenUtauMobile/OpenUtauMobile.csproj -p:TargetFrameworks=net9.0-ios -p:CheckEolWorkloads=false
 
       - name: Build iOS app
-        run: dotnet build OpenUtauMobile/OpenUtauMobile.csproj -c Release -f net9.0-ios -p:CheckEolWorkloads=false --no-restore
+        run: dotnet build OpenUtauMobile/OpenUtauMobile.csproj -c Release -f net9.0-ios -p:TargetFrameworks=net9.0-ios -p:CheckEolWorkloads=false --no-restore
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
